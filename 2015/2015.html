@@ -10,14 +10,24 @@
         <link rel="stylesheet" href="css/qgis2web.css"><link rel="stylesheet" href="css/fontawesome-all.min.css">
         <style>
         html, body {
-          font-family: 'Roboto';
+            font-family: 'Roboto';
           width: 100%;
       height: 100%;
       padding: 0;
       margin: 0;
       }
-        
-        
+    /* Popup content sample only */
+      .leaflet-popup-content-wrapper{
+	border-radius: initial;
+    background-color: teal;
+    color: white;
+	text-align: center;
+}
+/* Pop up arrow which appears below the popup */
+.leaflet-popup-tip {
+	background-color: teal;
+}
+        /*From div map, float shows where the map will be  */
         #map {
             width: 80%;
             height: 100%;
@@ -26,7 +36,7 @@
             float: left;
             
         }
-
+        /* The navigation bar, the position and float are relative to the map */
         #navbar{
             width: 20%;
             height: 100%;
@@ -35,7 +45,10 @@
             margin: 0;
             position: relative;
             background-color:teal;
-        }
+            /* The header style for the Malaria situation in thanchi upazila */
+        }.header{padding-top: 30px;} 
+
+        /* The Drop down buttons for the Year and Home style */
         /* Dropdown Button */
 .dropbtn {
   background-color: #04AA6D;
@@ -51,8 +64,8 @@
 .dropdown {
   position: relative;
   display: inline-block;
-  left: 80px;
-  top: 250px;
+  left: 65px;
+  top: 50px;
 }
 
 /* Dropdown Content (Hidden by Default) */
@@ -97,17 +110,17 @@
 .button {
   position: relative;
   display: inline-block;
-  left: 80px;
-  top: 270px;
+  left: 65px;
+  top: 70px;
 }
 
 .button:hover .button2 {background-color: #3e8e41;}
-
         </style>
         <title></title>
     </head>
     <body>
     <div id="navbar">
+        <div class="header">  <h3 align="center"; style=" font-family: Roboto; font-size: 27px; color: #ffff;">Malaria situation<br/>in<br/>Thanchi upazila<br/><br/>2015</h3></div>
         <div class="dropdown">
             <button class="dropbtn">Year</button>
             <div class="dropdown-content">
@@ -159,6 +172,17 @@
               });
             }
         }
+        var Health = L.icon({
+    iconUrl: 'Health.svg',
+    iconSize:     [23.32, 23.32], // size of the icon
+    
+});
+
+var UHC = L.icon({
+    iconUrl: 'UHC.svg',
+    iconSize:     [23.32, 23.32], // size of the icon
+    
+});
         var map = L.map('map', {
             zoomControl:true, maxZoom:22, minZoom:1
         }).fitBounds([[21.139238296998993,91.75183567714464],[22.022157369715348,93.03067408020932]]);
@@ -749,24 +773,12 @@
         });
         bounds_group.addLayer(layer_HealthWorkers_6);
         map.addLayer(layer_HealthWorkers_6);
+
         function pop_ThanchiUpazillaHealthComplex_7(feature, layer) {
-            layer.on({
-                mouseout: function(e) {
-                    for (i in e.target._eventParents) {
-                        e.target._eventParents[i].resetStyle(e.target);
-                    }
-                },
-                mouseover: highlightFeature,
-            });
+           
             var popupContent = '<table>\
                     <tr>\
-                        <td colspan="2">' + (feature.properties['id'] !== null ? autolinker.link(feature.properties['id'].toLocaleString()) : '') + '</td>\
-                    </tr>\
-                    <tr>\
                         <td colspan="2">' + (feature.properties['Upazila'] !== null ? autolinker.link(feature.properties['Upazila'].toLocaleString()) : '') + '</td>\
-                    </tr>\
-                    <tr>\
-                        <td colspan="2">' + (feature.properties['Union'] !== null ? autolinker.link(feature.properties['Union'].toLocaleString()) : '') + '</td>\
                     </tr>\
                     <tr>\
                         <td colspan="2">' + (feature.properties['Name'] !== null ? autolinker.link(feature.properties['Name'].toLocaleString()) : '') + '</td>\
@@ -778,18 +790,10 @@
         function style_ThanchiUpazillaHealthComplex_7_0() {
             return {
                 pane: 'pane_ThanchiUpazillaHealthComplex_7',
-                shape: 'diamond',
-                radius: 8.8,
-                opacity: 1,
-                color: 'rgba(50,87,128,1.0)',
-                dashArray: '',
-                lineCap: 'butt',
-                lineJoin: 'miter',
-                weight: 2.0,
-                fill: true,
-                fillOpacity: 1,
-                fillColor: 'rgba(72,236,182,1.0)',
-                interactive: true,
+        rotationAngle: 0.0,
+        rotationOrigin: 'center center',
+        icon: Health,
+        interactive: true,
             }
         }
         map.createPane('pane_ThanchiUpazillaHealthComplex_7');
@@ -807,7 +811,7 @@
                     feature: feature,
                     variables: {}
                 };
-                return L.shapeMarker(latlng, style_ThanchiUpazillaHealthComplex_7_0(feature));
+                return L.marker(latlng, style_ThanchiUpazillaHealthComplex_7_0(feature)).on('mousemove', function(e){e.target.setIcon(UHC);}).on('mouseout', function(e){e.target.setIcon(Health);});
             },
         });
         bounds_group.addLayer(layer_ThanchiUpazillaHealthComplex_7);
@@ -828,26 +832,38 @@
               addLabel(layer, i);
               i++;
         });
+        
+        // The Myanmar headline --> offset helps you to move the logo but you need multiples to get them at different offets when you zoom in and out. To create the halo you need the text shadow as said below
+
         var i = 0;
         layer_Myanmar_2.eachLayer(function(layer) {
             var context = {
                 feature: layer.feature,
                 variables: {}
             };
-            layer.bindTooltip((layer.feature.properties['Name'] !== null?String('<div style="color: #000000; font-size: 20pt; font-weight: bold; font-family: \'MS Sans Serif\', sans-serif;">' + layer.feature.properties['Name']) + '</div>':''), {permanent: true, offset: [-0, -16], className: 'css_Myanmar_2'});
+            layer.bindTooltip((layer.feature.properties['Name'] !== null?String('<div style="color: #000000; font-size: 20pt; font-weight: bold; font-family: \'Roboto\', sans-serif; text-shadow: -3px -3px 0 #FFFFFF, 3px -3px 0 #FFFFFF, -3px 3px 0 #FFFFFF, 3px 3px 0 #FFFFFF;">' + layer.feature.properties['Name']) + '</div>':''), {permanent: true, direction: 'center', offset: [1726, 4366], className: 'css_Myanmar_2'});
+            labels.push(layer);
+            totalMarkers += 1;
+              layer.added = true;
+              addLabel(layer, i);
+              i++;
+            layer.bindTooltip((layer.feature.properties['Name'] !== null?String('<div style="color: #000000; font-size: 30pt; font-weight: bold; font-family: \'Roboto\', sans-serif; text-shadow: -3px -3px 0 #FFFFFF, 3px -3px 0 #FFFFFF, -3px 3px 0 #FFFFFF, 3px 3px 0 #FFFFFF;">' + layer.feature.properties['Name']) + '</div>':''), {permanent: true, direction: 'center', offset: [135, 1175], className: 'css_Myanmar_2'});
             labels.push(layer);
             totalMarkers += 1;
               layer.added = true;
               addLabel(layer, i);
               i++;
         });
+
+        // Same offset and style to be used for India just like the Myanmar above.
+
         var i = 0;
         layer_India_3.eachLayer(function(layer) {
             var context = {
                 feature: layer.feature,
                 variables: {}
             };
-            layer.bindTooltip((layer.feature.properties['NAME_0'] !== null?String('<div style="color: #000000; font-size: 20pt; font-weight: bold; font-family: \'MS Sans Serif\', sans-serif;">' + layer.feature.properties['NAME_0']) + '</div>':''), {permanent: true, offset: [-0, -16], className: 'css_India_3'});
+            layer.bindTooltip((layer.feature.properties['NAME_0'] !== null?String('<div style="color: #000000; font-size: 20pt; font-weight: bold; font-family: \'MS Sans Serif\', sans-serif;text-shadow: -3px -3px 0 #FFFFFF, 3px -3px 0 #FFFFFF, -3px 3px 0 #FFFFFF, 3px 3px 0 #FFFFFF;">' + layer.feature.properties['NAME_0']) + '</div>':''), {permanent: true, direction: 'right', offset: [-380, -5817], className: 'css_India_3'});
             labels.push(layer);
             totalMarkers += 1;
               layer.added = true;
